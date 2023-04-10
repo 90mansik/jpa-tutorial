@@ -122,3 +122,88 @@ public class JpaMain {
 - EntityManager의 find를 통해 하나의 회원 정보를 가져 옴.
 - Update시에는 setter에 set을 하게 되면 데이터가 변경 되게 된다.
     - 변경 사항은 트랜잭션을 commit하는 시점에 체크 하며, 변경사항이 있으면 트랜직션 직전에 업데이트 쿼리를 만들어 날리고 트랜잭션이 commit 됨
+
+
+# 영속성 관리
+
+### 영속성
+
+- 데이터를 생성한 프로그램이 종료되어도 사라지지 않는 데이터의 특성
+- 영속성을 갖지 않으면 데이터는 메모리에서만 존재하게 되고 프로그램이 종료되면 해당 데이터는 모두 사라지게 되므로, 데이터를 파일이나 DB에 영구 저장함으로써 데이터에 영속성을 부여
+
+### 엔티티의 생명 주기
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/b78b089e-6290-44bc-ac18-58cc5baee0f0/Untitled.png)
+
+```java
+public class Main(){
+    public static void persistence() {
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+            EntityManager em = emf.createEntityManager();
+            EntityTransaction tx = em.getTransaction();
+    
+            tx.begin();
+    
+            try {
+                // 비영속
+                Member member = new Member();
+                member.setId(101L);
+                member.setName("HelloJPA");
+    
+                // 영속
+                System.out.println("==== BEFORE =====");
+                em.persist(member);
+                System.out.println("==== AFTER =====");
+                            
+                            // 준영속 상태
+                            em.detach(member);
+    
+                Member findMember = em.find(Member.class, 101L);
+                Member findMember2 = em.find(Member.class, 101L);
+    
+                System.out.println("findMember.id = " + findMember.getId());
+                System.out.println("findMember.name = " + findMember.getName());
+                            // 객체를 상태한 상태
+                            em.remove(member)
+                tx.commit();
+            } catch (Exception e) {
+                tx.rollback();
+            } finally {
+                em.close();
+            }
+    
+            emf.close();
+        }
+}
+```
+
+- 비영속(new/transient)
+    - 영속성 컨텍스트와 전혀 관계가 없는 새로운 상태
+- 영속( managed)
+    - 영속성 컨텍스트에 관리되는  상태
+    - em.persist(member) 객체를 저장한 상태
+    - 엔티티를 저장하는 INSERT 쿼리문이 생성 되었지만, 아직 DB에게 전달되지 않고 쿼리문 저장소에 보관
+- 준영속(datached)
+    - 영속성 컨텍스트에 저장되었다가 **분리**된 상태
+- 삭제 (removed)
+    - 삭제 상태는 엔티티를 영속성 컨텍스트에서 관리하지 않게 되고, 해당 엔티티를 DB에서 삭제하는 DELETE 쿼리문을 보관하게 됩니다
+
+## 영속성 컨텍스트의 이점
+
+### 1차캐시
+
+- EntityManager가 관리하는 영속성 컨텍스트 내부에 있는 첫 번째 캐시입니다.
+- 조회 동작 방식
+    - 1차 캐시에 데이터가 이미 있는지 확인하고, 데이터가 있으면 데이터를 가져온다.
+    - 1차 캐시에 데이터가 없다면, 데이터 베이스에 데이터를 요청 한다.
+    - 데이터베이스에서 받은 데이터를 다음에 재사용할 수 있도록 1차 캐시에 저장
+- 쓰기 동작 방식
+    - 데이터가 변경되면 즉시 1차캐시에 반영
+    - 변경 사항이 지연 SQL 저장소에 저장
+    - Transaction이 commit되면 Flush가 발생
+    - 지연 SQL 저장소에 있는 SQL문을 DB에 요청
+
+### 동일성 보장(identity) 보장
+
+- 1차 캐시로 반복 가능한 읽기(REPEATABLE READ) 등급의 트랜잭
+  션 격리 수준을 데이터베이스가 아닌 애플리케이션 차원에서 제공
