@@ -36,9 +36,9 @@
 
 - JPA는 기본적으로 persistance.xml에서 설정 정보를 관리.
     - resource/META-INF/persistence.xml에 위치 시  별도 설정 없이 JPA가 인식
-- <persistence-unit>
-    - name에 unit의 고유한 이름을 설정, 일반적으로 연결할 데이터베이스당 하나의 persistence unit을 등록한
-- <properties> 아래에 JPA 표준 속성과 하이버네이트 속성을 설정
+- persistence-unit
+    - name에 unit의 고유한 이름을 설정, 일반적으로 연결할 데이터베이스당 하나의 persistence unit을 등록
+- properties 아래에 JPA 표준 속성과 하이버네이트 속성을 설정
 - 필수 속성
     - javax.persistence.*  :JPA 표준 속성
         - 데이터베이스의 연결정보를 설정
@@ -164,7 +164,7 @@ public class Main(){
                 System.out.println("findMember.id = " + findMember.getId());
                 System.out.println("findMember.name = " + findMember.getName());
                             // 객체를 상태한 상태
-                            em.remove(member)
+                            em.remove(member);
                 tx.commit();
             } catch (Exception e) {
                 tx.rollback();
@@ -207,3 +207,63 @@ public class Main(){
 
 - 1차 캐시로 반복 가능한 읽기(REPEATABLE READ) 등급의 트랜잭
   션 격리 수준을 데이터베이스가 아닌 애플리케이션 차원에서 제공
+
+## Entity 매핑
+
+### 객체와 테이블 매핑 하려면?
+
+- @Entity, @Table 애노테이션을 붙여준다.
+
+### @Entity
+
+- JPA가 @Entity가 붙은 클래스를 관리 하게 되고, 테이블과 매핑 시켜 준다.
+- Entity 사용 시 주의 사항
+  - 기본 생성자가 필수 ( public, protected 생성자 )
+    - 자바는 기본 생성자를 만들지 않으면 빈 생성자를 자동으로 생성한다.
+    - 그러나 별도의 생성자를 정의할 경우 기본 생성자가 만들어지지 않는다.
+    - 그럴 땐 반드시 기본 생성자를 명시적으로 정의해야 한다.
+  - final 클래스, interface, innser 클래스에는 사용 불가 하다.
+- 속성
+  - name : Jpa에서 사용할 Entity의 이름을 부여, 디폴트로 클래스 명을 사용한다.
+
+### @Table
+
+- Entity와 매핑할 테이블을 지정한다.
+- 속성
+  - name : 매핑할 테이블 이름, 디폴트로 엔티티 이름을 사용
+  - catelog : 데이터 베이스의 catalog 매핑
+    - 데이터베이스 catelog : DBA의 도구로서 데이터베이스에 저장되어 있는 모든 데이터 개체들에 대한 정의나 명세에 대한 정보를 수록한 시스템 테이블
+  - schema : 데이터베이스 schema 매핑
+    - 데이터베이스 schema : 데이터베이스의 구조와 제약조건에 관한 전반적인 명세를 기술한 것
+  - uniqueConstraints(DDL)
+    - DDL 생성 시에 유니크 제약 조건 생성
+
+## 데이터베이스 스키마 자동 생성
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             version="2.1">
+    <persistence-unit name="hello">
+        <properties>
+					<property name="hibernate.hbm2ddl.auto" value="create"/>
+        </properties>
+    </persistence-unit>
+</persistence>
+```
+
+- 위의 [hibernate.hbm2ddl.auto](http://hibernate.hbm2ddl.auto) 옵션을 사용하여 애플리케이션 실행 시점에  DDL문을 자동 생성 가능하다.
+- 이때 JPA는 데이터베이스 방언을 활용해서 데이터베이스에 적절한 DDL문을 만들어준다.
+- 생성된 DDL문은 로컬 테스트 및 개발 장비에서만 사용할 것을 권장하고, 운영서버에 사용할 경우에는 적절히 다듬어서 사용 해야 한다.
+- hibernate.hbm2ddl.auto 옵션
+  - create : 기존테이블 삭제 후 다시 생성 (DROP + CREATE)
+  - create-drop : create 같으나 종료 시점에 테이블 DROP
+  - update : 변경분만 반영
+    - 운영 DB에 사용 시 테이블이 락이 걸려 문제가 될 수 있다. 운영 DB에는 사용 X
+  - validate : 엔티티와 테이블이 정상 매핑되었는지만 확인
+  - none : 사용하지 않음.
+    - 위4가지 옵션을 사용하지 않으면 아무 옵션을 입력해도 none으로 처리 되지만 개발자의 편의성을 위해 표
+- hibernate.hbm2ddl.auto 사용 전략
+  - 개발 초기 단계(로컬) : create, update
+  - 테스트 서버 : update, validate
+  - 스테이징, 운영 서버 : validate, none
