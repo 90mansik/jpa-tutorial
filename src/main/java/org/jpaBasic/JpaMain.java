@@ -11,11 +11,24 @@ public class JpaMain {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
         EntityManager em = emf.createEntityManager();
 
-//        insert(emf, em);
-//        select(emf, em);
-//        update(emf, em);
-//        delete(emf, em);
-        jpqlSelect(emf, em);
+        EntityTransaction tx = em.getTransaction();     // 트랜잭션 얻기
+        tx.begin();         // 트랜잭션 시작
+
+        try {
+            Member member = new Member();
+            member.setId(1L);
+            member.setUsername("A");
+            member.setRoleType(RoleType.USER);
+
+            em.persist(member);
+
+            tx.commit();
+        } catch (Exception e) {
+            tx.rollback();
+        } finally {
+            em.close();
+        }
+        emf.close();
     }
 
     private static void jpqlSelect(EntityManagerFactory emf, EntityManager em) {
@@ -29,9 +42,9 @@ public class JpaMain {
                     .getResultList();
 
             for (Member member: result) {
-                System.out.println("member.getName() = " + member.getName());
+                System.out.println("member.getName() = " + member.getUsername());
             }
-            
+
             tx.commit();
         } catch (Exception e) {
             tx.rollback();
@@ -48,7 +61,7 @@ public class JpaMain {
         try {
             Member findMember = em.find(Member.class, 1L);
             System.out.println("findMember.id = " + findMember.getId());
-            System.out.println("findMember.name = " + findMember.getName());
+            System.out.println("findMember.name = " + findMember.getUsername());
             tx.commit();
         } catch (Exception e) {
             tx.rollback();
@@ -64,7 +77,7 @@ public class JpaMain {
 
         try {
             Member findMember = em.find(Member.class, 1L);
-            findMember.setName("HelloJPA");
+            findMember.setUsername("HelloJPA");
 
             tx.commit();
         } catch (Exception e) {
@@ -99,7 +112,7 @@ public class JpaMain {
         try {
             Member member = new Member();
             member.setId(1L);
-            member.setName("HelloA");
+            member.setUsername("HelloA");
 
             em.persist(member);
 
@@ -111,5 +124,4 @@ public class JpaMain {
         }
         emf.close();
     }
-
 }
