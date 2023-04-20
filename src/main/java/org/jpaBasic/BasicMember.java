@@ -8,7 +8,7 @@ import java.util.Date;
         name = "MEMBER_SEQ_GENERATOR",
         table = "MY_SEQUENCES",
         pkColumnValue = "MEMBER_SEQ", allocationSize = 1)
-public class Member {
+public class BasicMember {
     @Id
     @GeneratedValue(strategy = GenerationType.TABLE,
             generator = "MEMBER_SEQ_GENERATOR")
@@ -29,10 +29,10 @@ public class Member {
     
     @Lob
     private String description;
-    protected  Member(){
+    protected BasicMember(){
     }
 
-    public Member(Long id, String username) {
+    public BasicMember(Long id, String username) {
         this.id = id;
         this.username = username;
     }

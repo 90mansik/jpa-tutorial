@@ -15,7 +15,7 @@ public class JpaMain {
         tx.begin();         // 트랜잭션 시작
 
         try {
-            Member member = new Member();
+            BasicMember member = new BasicMember();
             member.setId(1L);
             member.setUsername("A");
             member.setRoleType(RoleType.USER);
@@ -36,12 +36,12 @@ public class JpaMain {
         tx.begin();         // 트랜잭션 시작
 
         try {
-            List<Member> result = em.createQuery("select m from Member as m", Member.class)
+            List<BasicMember> result = em.createQuery("select m from BasicMember as m", BasicMember.class)
                     .setFirstResult(1)
                     .setMaxResults(10)
                     .getResultList();
 
-            for (Member member: result) {
+            for (BasicMember member: result) {
                 System.out.println("member.getName() = " + member.getUsername());
             }
 
@@ -59,7 +59,7 @@ public class JpaMain {
         tx.begin();         // 트랜잭션 시작
 
         try {
-            Member findMember = em.find(Member.class, 1L);
+            BasicMember findMember = em.find(BasicMember.class, 1L);
             System.out.println("findMember.id = " + findMember.getId());
             System.out.println("findMember.name = " + findMember.getUsername());
             tx.commit();
@@ -76,7 +76,7 @@ public class JpaMain {
         tx.begin();         // 트랜잭션 시작
 
         try {
-            Member findMember = em.find(Member.class, 1L);
+            BasicMember findMember = em.find(BasicMember.class, 1L);
             findMember.setUsername("HelloJPA");
 
             tx.commit();
@@ -93,7 +93,7 @@ public class JpaMain {
         tx.begin();         // 트랜잭션 시작
 
         try {
-            Member findMember = em.find(Member.class, 1L);
+            BasicMember findMember = em.find(BasicMember.class, 1L);
 
             em.remove(findMember);
             tx.commit();
@@ -110,7 +110,7 @@ public class JpaMain {
         tx.begin();         // 트랜잭션 시작
 
         try {
-            Member member = new Member();
+            BasicMember member = new BasicMember();
             member.setId(1L);
             member.setUsername("HelloA");
 

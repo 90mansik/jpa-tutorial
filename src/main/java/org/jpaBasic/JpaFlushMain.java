@@ -14,7 +14,7 @@ public class JpaFlushMain {
         tx.begin();
 
         try {
-            Member member = new Member(300L, "member300");
+            BasicMember member = new BasicMember(300L, "member300");
             em.persist(member);
 
             em.flush();

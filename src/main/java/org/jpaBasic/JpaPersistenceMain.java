@@ -24,20 +24,20 @@ public class JpaPersistenceMain {
 
         try {
             // 비영속
-            Member member = new Member();
+            BasicMember member = new BasicMember();
             member.setId(101L);
-            member.setName("HelloJPA");
+            member.setUsername("HelloJPA");
 
             // 영속
             System.out.println("==== BEFORE =====");
             em.persist(member);
             System.out.println("==== AFTER =====");
 
-            Member findMember = em.find(Member.class, 101L);
-            Member findMember2 = em.find(Member.class, 101L);
+            BasicMember findMember = em.find(BasicMember.class, 101L);
+            BasicMember findMember2 = em.find(BasicMember.class, 101L);
 
             System.out.println("findMember.id = " + findMember.getId());
-            System.out.println("findMember.name = " + findMember.getName());
+            System.out.println("findMember.name = " + findMember.getUsername());
 
             tx.commit();
         } catch (Exception e) {
@@ -60,8 +60,8 @@ public class JpaPersistenceMain {
         try {
 
             // 영속
-            Member findMember = em.find(Member.class, 101L);
-            Member findMember2 = em.find(Member.class, 101L);
+            BasicMember findMember = em.find(BasicMember.class, 101L);
+            BasicMember findMember2 = em.find(BasicMember.class, 101L);
 
             System.out.println("result = " + (findMember == findMember2));
 
@@ -83,8 +83,8 @@ public class JpaPersistenceMain {
         tx.begin();
 
         try {
-            Member findMember = em.find(Member.class, 101L);
-            findMember.setName("change");
+            BasicMember findMember = em.find(BasicMember.class, 101L);
+            findMember.setUsername("change");
 
             System.out.println("==============");
             tx.commit();
